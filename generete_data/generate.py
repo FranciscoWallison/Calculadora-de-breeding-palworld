@@ -1,0 +1,33 @@
+import csv
+import json
+import requests
+import os
+
+# Leitura do CSV
+with open('combinationsv1-3-012.csv', newline='') as csvfile:
+    csvreader = csv.reader(csvfile)
+    rows = list(csvreader)
+
+# Parse CSV para estrutura de dados
+individuals = rows[0][1:]  # Nomes dos indivíduos
+treeData = {}
+
+for row in rows[1:]:
+    nome_pai = row[0].lstrip('_').replace(" ", "_").lower().replace("_", "-").replace("-special", "")
+    
+    for index, parent in enumerate(row[1:]):
+        nome_mae = individuals[index].replace(" ", "_").lower().replace("_", "-").replace("-special", "")
+        nome_filho = parent.replace(" ", "_").lower().replace("_", "-").replace("-special", "")
+
+        if nome_filho not in treeData:
+            treeData[nome_filho] = {'parents': []}
+
+        treeData[nome_filho]['parents'].append({'nome_pai': nome_pai, 'nome_mae': nome_mae})
+
+        print(f' Filhos gerado: {nome_filho}' )
+
+
+
+# Convertendo para JSON e salvando em um arquivo
+with open('treeData.json', 'w') as jsonfile:
+    json.dump(treeData, jsonfile, indent=2)
