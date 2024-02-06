@@ -36,7 +36,15 @@
         <!-- <h4>Pega no ovo do Pal</h4> -->
 
         <label for="consulta" class="form-label">Digite para Filtrar o Pal de sua preferencia:</label>
-        <input type="text" class="form-control" id="consulta" placeholder="Digite aqui">
+
+        <div class="row">
+            <div class="input-group">
+                <input type="text" class="form-control" id="consulta" placeholder="Digite aqui">
+                <button type="button" id="pesquisar" class="btn btn-outline-primary" onclick="consultarPesquisar(true)" >Pesquisar</button>
+                <button type="button" id="todos" class="btn btn-outline-info" onclick="consultarPesquisar(false)">Todos</button>
+            </div>
+        </div>
+
 
         <div class="mt-3">
             <h3>Pegue no Pal para ver quem são os pais:</h3>
@@ -191,12 +199,16 @@
             const nome_formatado = nome.replaceAll(" ", "_").toLowerCase().replaceAll("_", "-").replaceAll("-(special)", "");
             const generate_tree_data = await window.generate_tree_data;
 
-
             if (validFilter) {
                 await filtrarInformacoes(nome);
             }
             await exibirResultados(generate_tree_data[nome_formatado], nome);
         }
+
+        async function consultarPesquisar(validar) {
+            await filtrarInformacoes(validar? document.getElementById("consulta").value.toLowerCase() : "");
+        }
+        
 
         // Função para exibir os resultados filtrados na lista
         async function exibirResultados(resultados, nameChildren) {
