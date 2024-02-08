@@ -25,6 +25,12 @@
         h6 {
             font-size: 0.5em;
         }
+
+        .card-select {
+            border-color: cornflowerblue;
+            border-radius: 13px;
+            border-width: 5px;
+        }
     </style>
 </head>
 
@@ -49,25 +55,73 @@
 
 
         <div class="mt-3">
-            <h3>Pegue no Pal para ver quem são os pais:</h3>
-            <ul id="resultado" class="list-group">
-                <div class="container px-2">
-                    <div class="row ">
-                        <div class="">
-                            <div class="row" id="resultChildren">
-                            </div>
+            <div class="accordion" id="accordionExample">
+                <div class="accordion-item">
+                    <h2 class="accordion-header">
+                        <button class="accordion-button" type="button" aria-expanded="true" aria-controls="collapseOne"
+                            onclick="toggleAccordion('collapseOne')">
+                            <h3>Pegue no Pal para ver quem são os pais:</h3>
+                        </button>
+                    </h2>
+                    <div id="collapseOne" class="accordion-collapse collapse show">
+                        <div class="accordion-body">
+                            <!-- informação selecionar Pal -->
+                            <ul id="resultado" class="list-group">
+                                <div class="container px-2">
+                                    <div class="row">
+                                        <div class="">
+                                            <div class="row" id="resultChildren">
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </ul>
                         </div>
-
                     </div>
                 </div>
-            </ul>
-            <!-- Aqui serão exibidos os resultados filtrados -->
-            <h3>Informações dos pal acasalando:</h3>
-            <div>
-                <div id="result">
+                <div class="accordion-item">
+                    <h2 class="accordion-header">
+                        <button class="accordion-button collapsed" type="button" aria-expanded="false"
+                            aria-controls="collapseTwo" onclick="toggleAccordion('collapseTwo')">
+                            <h3>Informações dos pal acasalando:</h3>
+                        </button>
+                    </h2>
+                    <div id="collapseTwo" class="accordion-collapse collapse">
+                        <div class="accordion-body">
+                            <!-- Aqui serão exibidos os resultados filtrados -->
+                            <div>
+                                <div id="result">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="accordion-item">
+                    <h2 class="accordion-header">
+                        <button class="accordion-button collapsed" type="button" aria-expanded="false"
+                            aria-controls="collapseThree" onclick="toggleAccordion('collapseThree')">
+                            <h3>Informações dos pal que pode gerar:</h3>
+                        </button>
+                    </h2>
+                    <div id="collapseThree" class="accordion-collapse collapse">
+                        <div class="accordion-body">
+                            <!-- informação selecionar Pal -->
+                            <ul id="resultado_pai_para_filhos" class="list-group">
+                                <div class="container px-2">
+                                    <div class="row">
+                                        <div class="">
+                                            <div class="row" id="result_parent_Children">
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </ul>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
+
     </div>
 
     <!-- Modal -->
@@ -100,7 +154,7 @@
         window.generate_tree_data = lerBaseDeDados();
 
 
-        // Seu CSV
+        // Json de possíveis filhos
         const relationship_Data = "./generete_data/relationshipData.json";
 
         lerBaseRelationshipData = async () => {
@@ -183,11 +237,9 @@
 
 
                 listaResultadoResultChildren.innerHTML += `
-
-                    <div class="col-2 m-0 border-0">
+                    <div class="col-4 m-0 border-0" >
                         <div class="d-flex align-items-center">
-
-                            <div class="card align-items-center">
+                            <div class="card align-items-center" id="${name}">
                                 <img class="bd-placeholder-img rounded img-thumbnail pegou-no-pal" width="80"
                                 height="80"
                                     src="${img.src}" onclick="consultar('${name}', true)" />
@@ -196,9 +248,8 @@
                                 </div>
                             </div>
                         </div>
-                    </div>
-                
-        `;
+                    </div>                
+                `;
             };
 
             console.log("stringConcatenada: ", stringConcatenada)
@@ -219,6 +270,16 @@
 
             if (validFilter) {
                 await filtrarInformacoes(nome);
+
+                // Remove todas as classes de todos os elementos com a classe "card-select"
+                let elements_all_card = document.querySelectorAll('.card-select');
+                elements_all_card.forEach(function (element) {
+                    removeAllClasses(element);
+                });
+
+                let card_element = document.getElementById(nome);
+                card_element.classList.add("card-select");
+
             }
             await exibirResultados(generate_tree_data[nome_formatado], nome);
         }
@@ -340,6 +401,23 @@
             return words.join(" ");
         }
 
+        function toggleAccordion(collapseId) {
+            var collapseElement = document.getElementById(collapseId);
+            var buttonElement = collapseElement.previousElementSibling.querySelector('.accordion-button');
+
+            if (collapseElement.classList.contains('show')) {
+                collapseElement.classList.remove('show');
+                buttonElement.setAttribute('aria-expanded', 'false');
+            } else {
+                collapseElement.classList.add('show');
+                buttonElement.setAttribute('aria-expanded', 'true');
+            }
+        }
+
+        // Função para remover todas as classes de um elemento
+        function removeAllClasses(element) {
+            element.className = ''; // Define a propriedade className como uma string vazia
+        }
 
     </script>
 </body>
