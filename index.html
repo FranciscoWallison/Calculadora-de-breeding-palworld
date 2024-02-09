@@ -220,16 +220,6 @@
             //pegando todas as chaves.
             let stringConcatenada = await concatenarChaves(await window.generate_tree_data);
 
-            // Função para carregar uma imagem de forma assíncrona
-            const loadImage = async (nome) => {
-                return new Promise((resolve, reject) => {
-                    const img = new Image();
-                    img.onload = () => resolve(img);
-                    img.onerror = () => reject(new Error(`Erro ao carregar a imagem: ${nome}`));
-                    img.src = `generete_data/imagens/${nome.replaceAll(" ", "_").toLowerCase().replaceAll("_", "-").replaceAll("-(special)", "")}.png`;
-                });
-            };
-
             // Função para adicionar um item à lista de resultados
             const addItemToList = async (name) => {
                 // Carregar a imagem assincronamente
@@ -260,6 +250,7 @@
                 }
             }
 
+
             await hidePreload();
         }
 
@@ -280,8 +271,47 @@
                 let card_element = document.getElementById(nome);
                 card_element.classList.add("card-select");
 
+                await filtrarInformacoesParent(nome);
+
+
+
             }
             await exibirResultados(generate_tree_data[nome_formatado], nome);
+        }
+
+
+        async function filtrarInformacoesParent(name) {
+            const listaResultParentChildren = document.getElementById('result_parent_Children');
+            listaResultParentChildren.innerHTML = "";
+            let stringConcatenadaParentChildren = await window.relationship_Data;
+            stringConcatenadaParentChildren = stringConcatenadaParentChildren[name]
+            let arraySemDuplicatas = [...new Set(stringConcatenadaParentChildren)];
+
+            // Função para adicionar um item à lista de resultados
+            const addItemToListParentChildren = async (name) => {
+                // Carregar a imagem assincronamente
+                const img = await loadImage(name);
+
+
+                listaResultParentChildren.innerHTML += `
+                    <div class="col-4 m-0 border-0" >
+                        <div class="d-flex align-items-center">
+                            <div class="card align-items-center" id="${name}">
+                                <img class="bd-placeholder-img rounded img-thumbnail pegou-no-pal" width="80"
+                                height="80"
+                                    src="${img.src}" onclick="consultar('${name}', true)" />
+                                <div class="">
+                                    <h6 class="card-title">${titleize(name)}</h6>
+                                </div>
+                            </div>
+                        </div>
+                    </div>                
+                `;
+            };
+            // Executar o loop assincronamente
+            for (const nome of arraySemDuplicatas) {
+                await addItemToListParentChildren(nome);
+            }
         }
 
         async function consultarPesquisar(validar) {
@@ -295,16 +325,6 @@
 
             const listaResultado = document.getElementById('result');
             listaResultado.innerHTML = ''; // Limpa a lista antes de adicionar os resultados
-
-            // Função para carregar uma imagem de forma assíncrona
-            const loadImage = async (nome) => {
-                return new Promise((resolve, reject) => {
-                    const img = new Image();
-                    img.onload = () => resolve(img);
-                    img.onerror = () => reject(new Error(`Erro ao carregar a imagem: ${nome}`));
-                    img.src = `generete_data/imagens/${nome.replaceAll(" ", "_").toLowerCase().replaceAll("_", "-").replaceAll("-(special)", "")}.png`;
-                });
-            };
 
             // Função para adicionar um item à lista de resultados
             const addItemToList = async (parent) => {
@@ -418,6 +438,15 @@
         function removeAllClasses(element) {
             element.className = ''; // Define a propriedade className como uma string vazia
         }
+
+        const loadImage = async (nome) => {
+            return new Promise((resolve, reject) => {
+                const img = new Image();
+                img.onload = () => resolve(img);
+                img.onerror = () => reject(new Error(`Erro ao carregar a imagem: ${nome}`));
+                img.src = `generete_data/imagens/${nome.replaceAll(" ", "_").toLowerCase().replaceAll("_", "-").replaceAll("-(special)", "")}.png`;
+            });
+        };
 
     </script>
 </body>

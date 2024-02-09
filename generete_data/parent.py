@@ -13,11 +13,11 @@ individuals = rows[0][1:]  # Nomes dos indivíduos
 treeData = {}
 
 for row in rows[1:]:
-    nome_pai = row[0].lstrip('_')
+    nome_pai = row[0].lstrip('_').replace(" ", "_").lower().replace("_", "-").replace("-special", "")
     
     for index, parent in enumerate(row[1:]):
-        nome_mae = individuals[index]
-        nome_filho = parent
+        nome_mae = individuals[index].replace(" ", "_").lower().replace("_", "-").replace("-special", "")
+        nome_filho = parent.replace(" ", "_").lower().replace("_", "-").replace("-special", "")
 
         if nome_filho not in treeData:
             treeData[nome_filho] = {'parents': []}
