@@ -1,12 +1,5 @@
-const CACHE_NAME = "v0";
-const urlsToCache = [
-  "/index.html",
-  "/generete_data/treeData.json",
-  "/generete_data/relationshipData.json",
-  "/manifest.json",
-  "/icon.png",
-  "/18AC.gif"
-];
+const CACHE_NAME = "v1.0.3";
+const urlsToCache = ["/", "/index.html",];
 
 self.addEventListener("install", (event) => {
   event.waitUntil(

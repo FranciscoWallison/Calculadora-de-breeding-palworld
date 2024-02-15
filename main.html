@@ -1,0 +1,469 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Árvore Genealógica Palworld</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous">
+    <link rel="manifest" href="/manifest.json">
+
+
+    <style>
+        .pegou-no-pal {
+            transition: transform 0.3s;
+            cursor: grab;
+        }
+
+        #preload-filhos {
+            display: none;
+        }
+
+        #preload-pais {
+            display: none;
+        }
+
+        h6 {
+            font-size: 0.5em;
+        }
+
+        .card-select {
+            border-color: cornflowerblue;
+            border-radius: 13px;
+            border-width: 5px;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="container mt-5">
+        <h1>Árvore Genealógica Palworld</h1>
+
+        <!-- <h4>Pega no ovo do Pal</h4> -->
+
+        <label for="consulta" class="form-label">Digite para Filtrar o Pal de sua preferencia:</label>
+
+        <div class="row">
+            <div class="input-group">
+                <input type="text" class="form-control" id="consulta" placeholder="Digite aqui">
+                <button type="button" id="pesquisar" class="btn btn-outline-primary"
+                    onclick="consultarPesquisar(true)">Pesquisar</button>
+                <button type="button" id="todos" class="btn btn-outline-info"
+                    onclick="consultarPesquisar(false)">Todos</button>
+            </div>
+        </div>
+
+
+        <div class="mt-3">
+            <div class="accordion" id="accordionExample">
+                <div class="accordion-item">
+                    <h2 class="accordion-header">
+                        <button class="accordion-button" type="button" aria-expanded="true" aria-controls="collapseOne"
+                            onclick="toggleAccordion('collapseOne')">
+                            <h3>Pegue no Pal para ver quem são os pais:</h3>
+                        </button>
+                    </h2>
+                    <div id="collapseOne" class="accordion-collapse collapse show">
+                        <div class="accordion-body">
+                            <!-- informação selecionar Pal -->
+                            <ul id="resultado" class="list-group">
+                                <div class="container px-2">
+                                    <div class="row">
+                                        <div class="">
+                                            <div class="row" id="resultChildren">
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+                <div class="accordion-item">
+                    <h2 class="accordion-header">
+                        <button class="accordion-button collapsed" type="button" aria-expanded="false"
+                            aria-controls="collapseTwo" onclick="toggleAccordion('collapseTwo')">
+                            <h3>Informações dos pal acasalando:</h3>
+                        </button>
+                    </h2>
+                    <div id="collapseTwo" class="accordion-collapse collapse">
+                        <div class="accordion-body">
+                            <!-- Aqui serão exibidos os resultados filtrados -->
+                            <div>
+                                <div id="result">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="accordion-item">
+                    <h2 class="accordion-header">
+                        <button class="accordion-button collapsed" type="button" aria-expanded="false"
+                            aria-controls="collapseThree" onclick="toggleAccordion('collapseThree')">
+                            <h3>Informações dos pal que pode gerar:</h3>
+                        </button>
+                    </h2>
+                    <div id="collapseThree" class="accordion-collapse collapse">
+                        <div class="accordion-body">
+                            <!-- informação selecionar Pal -->
+                            <ul id="resultado_pai_para_filhos" class="list-group">
+                                <div class="container px-2">
+                                    <div class="row">
+                                        <div class="">
+                                            <div class="row" id="result_parent_Children">
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Modal -->
+    <div class="modal fade" id="preload-pais" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+        <div class="modal-dialog row">
+            <div class="">
+                <img src="./18AC.gif" alt="" srcset="" class="rounded mx-auto d-block" style="width: 40%;">
+            </div>
+        </div>
+    </div>
+    <div class="modal-backdrop fade" id="preload-filho"></div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.8.5/d3.min.js"></script>
+    <img src="18AC.gif" alt="Loading...">
+    <script>
+
+        console.log("1.1.0")
+
+        debugger;
+        // Seu CSV
+        const generate_tree_data = "./generete_data/treeData.json";
+
+        lerBaseDeDados = async () => {
+            try {
+                debugger;
+                const resultado = await fetch(generate_tree_data);
+                if (!resultado.ok) {
+                    throw new Error(`Erro na solicitação: ${resultado.status}`);
+                }
+                const data = await resultado.json();
+                return data;
+            } catch (error) {
+                console.error("lerBaseDeDados: ", error);
+                return [];
+            }
+        };
+
+        window.generate_tree_data = lerBaseDeDados();
+
+
+        // Json de possíveis filhos
+        const relationship_Data = "./generete_data/relationshipData.json";
+
+        lerBaseRelationshipData = async () => {
+            try {
+                debugger;
+                const resultado = await fetch(relationship_Data);
+                if (!resultado.ok) {
+                    throw new Error(`Erro na solicitação: ${resultado.status}`);
+                }
+                const data = await resultado.json();
+                return data;
+            } catch (error) {
+                console.error("lerBaseRelationshipData: ", error);
+                return [];
+            }
+        };
+
+        window.relationship_Data = lerBaseRelationshipData();
+
+        // Função para percorrer as chaves do objeto e concatená-las em uma string
+        async function concatenarChaves(objeto) {
+            let resultado = [];
+
+            for (let chave in objeto) {
+                if (objeto.hasOwnProperty(chave) && !resultado.includes(chave)) {
+                    resultado.push(chave);
+                }
+            }
+
+            // Remover duplicatas
+            resultado = [...new Set(resultado)];
+
+            return resultado;
+        }
+
+        //iniciar mostranto todos 
+        filtrarInformacoes(null);
+
+        // Referência ao campo de consulta
+        const campoConsulta = document.getElementById('consulta');
+
+        // Adiciona um evento de input ao campo de consulta
+        campoConsulta.addEventListener('input', filtrarInformacoes);
+
+        // Função para filtrar as informações com base na consulta
+        async function filtrarInformacoes(nameFiltrado) {
+            await showPreload();
+
+            const listaResultadoResultChildren = document.getElementById('resultChildren');
+            listaResultadoResultChildren.innerHTML = "";
+
+            let consulta = "";
+
+            if (nameFiltrado != undefined && nameFiltrado != null) {
+                consulta = campoConsulta.value.toLowerCase();
+                console.log("filtrarInformacoes: ", typeof nameFiltrado === "string", campoConsulta);
+            }
+
+            let consultaTreatment = "";
+
+            if (typeof nameFiltrado === "string") {
+                consultaTreatment = nameFiltrado;
+            } else {
+                consultaTreatment = consulta.replaceAll(" ", "_").toLowerCase();
+            }
+
+            const arrayToTreeData = [];
+            //pegando todas as chaves.
+            let stringConcatenada = await concatenarChaves(await window.generate_tree_data);
+
+            // Função para adicionar um item à lista de resultados
+            const addItemToList = async (name) => {
+                // Carregar a imagem assincronamente
+                const img = await loadImage(name);
+
+
+                listaResultadoResultChildren.innerHTML += `
+                    <div class="col-xl-1 col-4 m-0 border-0" >
+                        <div class="d-flex align-items-center">
+                            <div class="card align-items-center" id="${name}">
+                                <img class="bd-placeholder-img rounded img-thumbnail pegou-no-pal" width="80"
+                                height="80"
+                                    src="${img.src}" onclick="consultar('${name}', true)" />
+                                <div class="">
+                                    <h6 class="card-title">${titleize(name)}</h6>
+                                </div>
+                            </div>
+                        </div>
+                    </div>                
+                `;
+            };
+
+            console.log("stringConcatenada: ", stringConcatenada)
+            // Executar o loop assincronamente
+            for (const nome of stringConcatenada) {
+                if (nome.toLowerCase().includes(consultaTreatment)) {
+                    await addItemToList(nome);
+                }
+            }
+
+
+            await hidePreload();
+        }
+
+
+        async function consultar(nome, validFilter) {
+            const nome_formatado = nome.replaceAll(" ", "_").toLowerCase().replaceAll("_", "-").replaceAll("-(special)", "");
+            const generate_tree_data = await window.generate_tree_data;
+
+            if (validFilter) {
+                await filtrarInformacoes(nome);
+
+                // Remove todas as classes de todos os elementos com a classe "card-select"
+                let elements_all_card = document.querySelectorAll('.card-select');
+                elements_all_card.forEach(function (element) {
+                    removeAllClasses(element);
+                });
+
+                let card_element = document.getElementById(nome);
+                card_element.classList.add("card-select");
+
+                await filtrarInformacoesParent(nome);
+
+
+
+            }
+            await exibirResultados(generate_tree_data[nome_formatado], nome);
+        }
+
+
+        async function filtrarInformacoesParent(name) {
+            const listaResultParentChildren = document.getElementById('result_parent_Children');
+            listaResultParentChildren.innerHTML = "";
+            let stringConcatenadaParentChildren = await window.relationship_Data;
+            stringConcatenadaParentChildren = stringConcatenadaParentChildren[name]
+            let arraySemDuplicatas = [...new Set(stringConcatenadaParentChildren)];
+
+            // Função para adicionar um item à lista de resultados
+            const addItemToListParentChildren = async (name) => {
+                // Carregar a imagem assincronamente
+                const img = await loadImage(name);
+
+
+                listaResultParentChildren.innerHTML += `
+                    <div class="col-xl-1 col-4 m-0 border-0" >
+                        <div class="d-flex align-items-center">
+                            <div class="card align-items-center" id="${name}">
+                                <img class="bd-placeholder-img rounded img-thumbnail pegou-no-pal" width="80"
+                                height="80"
+                                    src="${img.src}" onclick="consultar('${name}', true)" />
+                                <div class="">
+                                    <h6 class="card-title">${titleize(name)}</h6>
+                                </div>
+                            </div>
+                        </div>
+                    </div>                
+                `;
+            };
+            // Executar o loop assincronamente
+            for (const nome of arraySemDuplicatas) {
+                await addItemToListParentChildren(nome);
+            }
+        }
+
+        async function consultarPesquisar(validar) {
+            await filtrarInformacoes(validar ? document.getElementById("consulta").value.toLowerCase() : "");
+        }
+
+
+        // Função para exibir os resultados filtrados na lista
+        async function exibirResultados(resultados, nameChildren) {
+            await showPreload();
+
+            const listaResultado = document.getElementById('result');
+            listaResultado.innerHTML = ''; // Limpa a lista antes de adicionar os resultados
+
+            // Função para adicionar um item à lista de resultados
+            const addItemToList = async (parent) => {
+                const nomePai = parent.nome_pai;
+                const nomeMae = parent.nome_mae;
+
+                // Carregar as imagens assincronamente
+                const [imgPai, imgMae, imgChildren] = await Promise.all([
+                    loadImage(nomePai),
+                    loadImage(nomeMae),
+                    loadImage(nameChildren),
+                ]);
+
+                listaResultado.innerHTML += `
+                <div class="container px-2">
+                    <div class="row">
+                        <ul class="ms-1">
+                            <!-- loop -->
+                            <li class="list-group-item d-flex justify-content-center">
+                                <div class="m-0 border-0">
+                                    <div class="d-flex align-items-center">
+
+                                        <div class="card align-items-center">
+                                            <img class="bd-placeholder-img rounded img-thumbnail pegou-no-pal" width="100" height="80"
+                                                src="${imgPai.src}" onclick="consultar('${nomePai}', true)" />
+                                            <div class="">
+                                                <h6 class="card-title">${titleize(nomePai)}</h6>
+                                            </div>
+                                        </div>
+
+                                        <span class="mx-2">+</span>
+
+                                        <div class="card align-items-center">
+                                            <img class="bd-placeholder-img rounded img-thumbnail img-thumbnail pegou-no-pal" width="100" height="80"
+                                                src="${imgMae.src}" onclick="consultar('${nomeMae}', true)" />
+
+                                            <div class="">
+                                                <h6 class="card-title">${titleize(nomeMae)}</h6>
+                                            </div>
+                                        </div>
+
+                                        <span class="mx-2">=</span>
+
+                                        <div class="card align-items-center">
+                                            <img class="bd-placeholder-img rounded img-thumbnail pegou-no-pal" width="100" height="80"
+                                                src="${imgChildren.src}" onclick="consultar('${nameChildren}', true)" />
+
+                                            <div class="">
+                                                <h6 class="card-title">${titleize(nameChildren)}</h6>
+                                            </div>
+                                        </div>
+
+                                    </div>
+                                </div>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+                `;
+            };
+
+            // Executar o loop assincronamente
+            for (const parent of resultados.parents) {
+                await addItemToList(parent);
+            }
+
+            await hidePreload();
+        }
+
+        // Função para mostrar o preload
+        async function showPreload() {
+
+            document.getElementById('preload-filho').classList.add("show");
+            document.getElementById('preload-filho').style.display = 'block';
+            document.getElementById('preload-pais').classList.add("show");
+            document.getElementById('preload-pais').style.display = 'block';
+        }
+
+        // Função para esconder o preload
+        async function hidePreload() {
+            document.getElementById('preload-filho').classList.remove("show");
+            document.getElementById('preload-filho').style.display = 'none';
+            document.getElementById('preload-pais').classList.remove("show");
+            document.getElementById('preload-pais').style.display = 'none';
+        }
+
+        //help
+        function titleize(text) {
+            var words = text.replaceAll("_", " ").toLowerCase().split(" ");
+            for (var a = 0; a < words.length; a++) {
+                var w = words[a];
+                words[a] = w[0].toUpperCase() + w.slice(1);
+            }
+            return words.join(" ");
+        }
+
+        function toggleAccordion(collapseId) {
+            var collapseElement = document.getElementById(collapseId);
+            var buttonElement = collapseElement.previousElementSibling.querySelector('.accordion-button');
+
+            if (collapseElement.classList.contains('show')) {
+                collapseElement.classList.remove('show');
+                buttonElement.setAttribute('aria-expanded', 'false');
+            } else {
+                collapseElement.classList.add('show');
+                buttonElement.setAttribute('aria-expanded', 'true');
+            }
+        }
+
+        // Função para remover todas as classes de um elemento
+        function removeAllClasses(element) {
+            element.className = ''; // Define a propriedade className como uma string vazia
+        }
+
+        const loadImage = async (nome) => {
+            return new Promise((resolve, reject) => {
+                const img = new Image();
+                img.onload = () => resolve(img);
+                img.onerror = () => reject(new Error(`Erro ao carregar a imagem: ${nome}`));
+                img.src = `generete_data/imagens/${nome.replaceAll(" ", "_").toLowerCase().replaceAll("_", "-").replaceAll("-(special)", "")}.png`;
+            });
+        };
+
+    </script>
+</body>
+
+</html>
