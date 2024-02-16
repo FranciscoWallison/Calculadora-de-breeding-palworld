@@ -1,39 +1,44 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Splash Screen</title>
-  <!-- Estilos para centralizar a tela de carregamento -->
-  <style>
-    body {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      height: 100vh;
-      margin: 0;
-      background-color: #f0f0f0;
-    }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Splash Screen</title>
+    <!-- Estilos para centralizar a tela de carregamento -->
+    <style>
+        body {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            margin: 0;
+            background-color: #f0f0f0;
+        }
+    </style>
 </head>
+
 <body>
-  <!-- Tela de carregamento com o GIF -->
-  <img src="18AC.gif" alt="Loading...">
-  <!-- Script para registrar o Service Worker -->
-  <script>
-    if ('serviceWorker' in navigator) {
-      navigator.serviceWorker.register('/service-worker.js')
-        .then((registration) => {
-          console.log('Service Worker registrado com sucesso:', registration);
-          // Redirecionar para a página principal após a instalação do Service Worker
-          window.location.replace('/main.html');
-        })
-        .catch((error) => {
-          console.error('Erro ao registrar o Service Worker:', error);
-          // Redirecionar para uma página de erro em caso de falha
-          window.location.replace('/error.html');
-        });
-    }
-  </script>
+    <!-- Tela de carregamento com o GIF -->
+    <img src="18AC.gif" alt="Loading...">
+    <!-- Script para registrar o Service Worker -->
+    <script>
+        if ('serviceWorker' in navigator) {
+            var url = window.location.href;
+            var novaUrl = url.substring(0, url.lastIndexOf('/'));
+            navigator.serviceWorker.register(`${novaUrl}/service-worker.js`)
+                .then((registration) => {
+                    console.log('Service Worker registrado com sucesso:', registration);
+                    // Redirecionar para a página principal após a instalação do Service Worker
+                    window.location.replace(`${novaUrl}/main.html`);
+                })
+                .catch((error) => {
+                    console.error('Erro ao registrar o Service Worker:', error);
+                    // Redirecionar para uma página de erro em caso de falha
+                    window.location.replace(`${novaUrl}/error.html`);
+                });
+        }
+    </script>
 </body>
+
 </html>

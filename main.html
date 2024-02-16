@@ -143,12 +143,14 @@
 
         debugger;
         // Seu CSV
-        const generate_tree_data = "./generete_data/treeData.json";
+        const generate_tree_data = "/generete_data/treeData.json";
 
         lerBaseDeDados = async () => {
             try {
                 debugger;
-                const resultado = await fetch(generate_tree_data);
+                var url = window.location.href;
+                var novaUrl = url.substring(0, url.lastIndexOf('/'));
+                const resultado = await fetch(`${novaUrl}${generate_tree_data}`);
                 if (!resultado.ok) {
                     throw new Error(`Erro na solicitação: ${resultado.status}`);
                 }
@@ -164,12 +166,13 @@
 
 
         // Json de possíveis filhos
-        const relationship_Data = "./generete_data/relationshipData.json";
+        const relationship_Data = "/generete_data/relationshipData.json";
 
         lerBaseRelationshipData = async () => {
             try {
-                debugger;
-                const resultado = await fetch(relationship_Data);
+                var url = window.location.href;
+                var novaUrl = url.substring(0, url.lastIndexOf('/'));
+                const resultado = await fetch(`${novaUrl}${relationship_Data}`);
                 if (!resultado.ok) {
                     throw new Error(`Erro na solicitação: ${resultado.status}`);
                 }
